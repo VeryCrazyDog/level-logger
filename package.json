@@ -1,0 +1,33 @@
+{
+	"name": "level-logger",
+	"version": "0.1.0",
+	"description": "A flexible logger supports log level.",
+	"engines": {
+		"node": ">= 12.x"
+	},
+	"main": "./dist/index.js",
+	"devDependencies": {
+	},
+	"scripts": {
+		"lint": "eslint --ext .ts *.cjs . || cd .",
+		"fix": "eslint --ext .ts --fix *.cjs . || cd .",
+		"build": "tsc",
+		"test": "ava",
+		"prepack": "npm run build"
+	},
+	"license": "MIT",
+	"author": "VCD <VeryCrazyDog@gmail.com>",
+	"homepage": "https://github.com/VeryCrazyDog/level-logger#readme",
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/VeryCrazyDog/level-logger.git"
+	},
+	"bugs": {
+		"url": "https://github.com/VeryCrazyDog/level-logger/issues"
+	},
+	"keywords": [
+		"log",
+		"logger",
+		"loglevel"
+	]
+}

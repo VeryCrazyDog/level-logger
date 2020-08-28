@@ -1,0 +1,16 @@
+// Setup based on https://github.com/standard/eslint-config-standard-with-typescript
+{
+	"root": true,
+	"extends": "standard-with-typescript",
+	"parserOptions": { "project": "./tsconfig.json" },
+	"rules": {
+		"complexity": "error",
+		"max-depth": "error",
+		"max-len": [ "error", { "code": 120, "ignoreUrls": true } ],
+		"no-shadow": [ "error", { "builtinGlobals": true } ],
+		"no-var": "error",
+		"prefer-rest-params": "error",
+		"prefer-spread": "error",
+		"strict": "error"
+	}
+}
