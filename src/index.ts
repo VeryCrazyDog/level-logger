@@ -10,8 +10,8 @@ export type LogFunction = (messageLevel: LogLevel, prefix?: any[], message?: any
 type LevelLogFunction = (message?: any, ...optionalParams: any[]) => void
 
 export interface LoggerOptions {
-  levelStrict?: LogLevelConfigurable
-  level?: string
+  level?: LogLevelConfigurable
+  levelText?: string
   prefixes?: any[]
   timestampFormatter?: TimestampFormatFunction
   logger?: LogFunction
@@ -68,13 +68,13 @@ export default class LevelLogger {
       error: console.error
     }
     if (options != null) {
-      if (options.levelStrict != null) {
-        this.setLevelStrict(options.levelStrict)
-      } else if (options.level != null) {
-        this.setLevel(options.level)
+      if (options.level != null) {
+        this.#level = options.level
+      } else if (options.levelText != null) {
+        this.setLevel(options.levelText)
       }
       if (options.prefixes != null) {
-        this.setPrefixes(options.prefixes)
+        this.#prefixes = options.prefixes
       }
       if (options.timestampFormatter != null) {
         this.#timestampFormatter = options.timestampFormatter
@@ -84,28 +84,28 @@ export default class LevelLogger {
     this.updateLevelLogger()
   }
 
-  setLevel (level: string): void {
-    const lowerCaseLevel = level.toLowerCase()
-    if ((CONFIGURABLE_LOG_LEVELS as string[]).includes(lowerCaseLevel)) {
-      this.setLevel(lowerCaseLevel as LogLevelConfigurable)
-    }
-  }
-
-  setLevelStrict (level: LogLevelConfigurable): void {
+  set level (level: LogLevelConfigurable) {
     this.#level = level
     this.updateLevelLogger()
   }
 
-  getLevel (): LogLevelConfigurable {
+  get level (): LogLevelConfigurable {
     return this.#level
   }
 
-  setPrefixes (prefixes: any[]): void {
+  setLevel (level: string): void {
+    const lowerCaseLevel = level.toLowerCase()
+    if ((CONFIGURABLE_LOG_LEVELS as string[]).includes(lowerCaseLevel)) {
+      this.level = lowerCaseLevel as LogLevelConfigurable
+    }
+  }
+
+  set prefixes (prefixes: any[]) {
     this.#prefixes = prefixes
     this.updateLevelLogger()
   }
 
-  getPrefixes (): any[] {
+  get prefixes (): any[] {
     return [...this.#prefixes]
   }
 
