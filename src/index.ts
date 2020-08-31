@@ -84,6 +84,16 @@ export default class LevelLogger {
     this.updateLevelLogger()
   }
 
+  extend (options?: LoggerOptions): LevelLogger {
+    return new LevelLogger({
+      level: this.#level,
+      prefixes: [...this.prefixes],
+      timestampFormatter: this.#timestampFormatter,
+      logger: this.#logger ?? undefined,
+      ...options
+    })
+  }
+
   set level (level: LogLevelConfigurable) {
     this.#level = level
     this.updateLevelLogger()

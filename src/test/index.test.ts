@@ -36,9 +36,7 @@ test.serial('should resolve timestamp prefix', async (t) => {
     t.true(timestampRegex.test(message))
   }
   const logger = new LevelLogger({
-    prefixes: [
-      LogTags.TIMESTAMP
-    ]
+    prefixes: [LogTags.TIMESTAMP]
   })
   logger.info()
 })
@@ -48,9 +46,34 @@ test.serial('should resolve log level prefix', async (t) => {
     t.deepEqual(message, 'INFO')
   }
   const logger = new LevelLogger({
-    prefixes: [
-      LogTags.LOG_LEVEL
-    ]
+    prefixes: [LogTags.LOG_LEVEL]
+  })
+  logger.info()
+})
+
+test.serial('extend should retain previous logger options', async (t) => {
+  let logger = new LevelLogger({
+    level: 'warn',
+    prefixes: ['A']
+  })
+  logger = logger.extend()
+  t.deepEqual(logger.level, 'warn')
+  t.deepEqual(logger.prefixes, ['A'])
+})
+
+test.serial('extend should allow change of prefixes', async (t) => {
+  console.info = message => {
+    t.deepEqual(message, 'A')
+  }
+  let logger = new LevelLogger({
+    prefixes: ['A']
+  })
+  logger.info()
+  console.info = message => {
+    t.deepEqual(message, 'B')
+  }
+  logger = logger.extend({
+    prefixes: ['B']
   })
   logger.info()
 })
