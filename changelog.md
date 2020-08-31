@@ -6,11 +6,16 @@ and this module adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [0.1.1] - 2020-08-31
+### Fixed
+- Fix incorrect information in README.
+
 ## [0.1.0] - 2020-08-31
 ### Added
 - First public release.
 
 
 
-[Unreleased]: https://github.com/VeryCrazyDog/mysql-parser/compare/0.1.0...HEAD
+[Unreleased]: https://github.com/VeryCrazyDog/mysql-parser/compare/0.1.1...HEAD
+[0.1.0]: https://github.com/VeryCrazyDog/mysql-parser/compare/0.1.0...0.1.1
 [0.1.0]: https://github.com/VeryCrazyDog/level-logger/releases/tag/0.1.0

@@ -1,6 +1,6 @@
 {
 	"name": "@verycrazydog/level-logger",
-	"version": "0.1.0",
+	"version": "0.1.1",
 	"description": "A flexible logger supports log level.",
 	"engines": {
 		"node": ">= 12.x"
