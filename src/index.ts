@@ -46,14 +46,6 @@ const DEFAULT_TIMESTAMP_FORMATTER: TimestampFormatFunction = value => {
   return `${year}-${month}-${day} ${hour}:${minute}:${second}`
 }
 
-const DEFAULT_LOGGERS: Record<LogLevel, LevelLogFunction> = {
-  trace: console.trace,
-  debug: console.debug,
-  info: console.info,
-  warn: console.warn,
-  error: console.error
-}
-
 function noop (): void {}
 
 export default class LevelLogger {
@@ -69,7 +61,11 @@ export default class LevelLogger {
     this.#timestampFormatter = DEFAULT_TIMESTAMP_FORMATTER
     this.#logger = null
     this.#levelLogger = {
-      ...DEFAULT_LOGGERS
+      trace: console.trace,
+      debug: console.debug,
+      info: console.info,
+      warn: console.warn,
+      error: console.error
     }
     if (options != null) {
       if (options.levelStrict != null) {
@@ -122,15 +118,16 @@ export default class LevelLogger {
             return (message?: any, ...optionalParams: any[]) => {
               let newMessage: any
               if (prefixes.length > 0) {
+                const [format, ...params] = this.resolveSymbols(prefixes, messageLevel)
                 if (message !== undefined) {
-                  newMessage = util.format(this.resolveSymbols(prefixes, messageLevel), message)
+                  newMessage = util.format(format, ...params, message)
                 } else {
-                  newMessage = util.format(this.resolveSymbols(prefixes, messageLevel))
+                  newMessage = util.format(format, ...params)
                 }
               } else {
                 newMessage = message
               }
-              DEFAULT_LOGGERS[messageLevel](newMessage, ...optionalParams)
+              console[messageLevel](newMessage, ...optionalParams)
             }
           })(logLevel, this.#prefixes)
         } else {
@@ -151,10 +148,30 @@ export default class LevelLogger {
       if (p === TIMESTAMP_SYMBOL) {
         return this.#timestampFormatter(new Date())
       } else if (p === LOG_LEVEL_SYMBOL) {
-        return messageLevel
+        return messageLevel.toUpperCase()
       } else {
         return p
       }
     })
+  }
+
+  trace (message?: any, ...optionalParams: any[]): void {
+    this.#levelLogger.trace(message, ...optionalParams)
+  }
+
+  debug (message?: any, ...optionalParams: any[]): void {
+    this.#levelLogger.debug(message, ...optionalParams)
+  }
+
+  info (message?: any, ...optionalParams: any[]): void {
+    this.#levelLogger.info(message, ...optionalParams)
+  }
+
+  warn (message?: any, ...optionalParams: any[]): void {
+    this.#levelLogger.warn(message, ...optionalParams)
+  }
+
+  error (message?: any, ...optionalParams: any[]): void {
+    this.#levelLogger.error(message, ...optionalParams)
   }
 }
