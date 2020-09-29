@@ -6,7 +6,7 @@ const LOG_LEVEL_SYMBOL: unique symbol = Symbol('log-level')
 type LogLevel = 'trace' | 'debug' | 'info' | 'warn' | 'error'
 export type LogLevelConfigurable = 'disabled' | LogLevel
 export type TimestampFormatFunction = (value: Date) => string
-export type LogFunction = (messageLevel: LogLevel, prefix?: any[], message?: any, ...optionalParams: any[]) => void
+export type LogFunction = (messageLevel: LogLevel, prefixes: any[], message?: any, ...optionalParams: any[]) => void
 type LevelLogFunction = (message?: any, ...optionalParams: any[]) => void
 
 export interface LoggerOptions {
