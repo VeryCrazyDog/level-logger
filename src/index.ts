@@ -12,7 +12,7 @@ export type MessageFormatFunction = (
   message?: any,
   ...optionalParams: any[]
 ) => string
-export type LogFunction = (message: string) => void
+export type LogFunction = (level: LogLevel, message: string) => void
 type LevelLogFunction = (message?: any, ...optionalParams: any[]) => void
 
 export interface LoggerOptions {
@@ -165,7 +165,7 @@ export default class LevelLogger {
                 newMessage = message
               }
               newMessage = util.format(newMessage, ...optionalParams)
-              logger(newMessage)
+              logger(messageLevel, newMessage)
             }
           })(logLevel, this.#prefixes, this.#logger)
         } else if (this.#messageFormatter != null && this.#logger == null) {
@@ -189,7 +189,7 @@ export default class LevelLogger {
                 message,
                 ...optionalParams
               )
-              logger(newMessage)
+              logger(messageLevel, newMessage)
             }
           })(logLevel, this.#prefixes, this.#messageFormatter, this.#logger)
         }
