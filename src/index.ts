@@ -1,22 +1,22 @@
 import util from 'util'
 
 const TIMESTAMP_SYMBOL: unique symbol = Symbol('timestamp')
-const LOG_LEVEL_SYMBOL: unique symbol = Symbol('log-level')
+const MESSAGE_LEVEL_SYMBOL: unique symbol = Symbol('message-level')
 
-type LogLevel = 'trace' | 'debug' | 'info' | 'warn' | 'error'
-export type LogLevelConfigurable = 'disabled' | LogLevel
+export type MessageLevel = 'trace' | 'debug' | 'info' | 'warn' | 'error'
+export type LoggingLevel = 'off' | MessageLevel
 export type TimestampFormatFunction = (value: Date) => string
 export type MessageFormatFunction = (
-  messageLevel: LogLevel,
+  level: MessageLevel,
   prefixes: any[],
   message?: any,
   ...optionalParams: any[]
 ) => string
-export type LogFunction = (level: LogLevel, message: string) => void
-type LevelLogFunction = (message?: any, ...optionalParams: any[]) => void
+export type LogFunction = (level: MessageLevel, message: string) => void
+type MessageLevelLogFunction = (message?: any, ...optionalParams: any[]) => void
 
 export interface LoggerOptions {
-  level?: LogLevelConfigurable
+  level?: LoggingLevel
   levelText?: string
   prefixes?: any[]
   timestampFormatter?: TimestampFormatFunction
@@ -26,22 +26,22 @@ export interface LoggerOptions {
 
 export const LogTags: Readonly<{
   TIMESTAMP: typeof TIMESTAMP_SYMBOL
-  LOG_LEVEL: typeof LOG_LEVEL_SYMBOL
+  MESSAGE_LEVEL: typeof MESSAGE_LEVEL_SYMBOL
 }> = {
   TIMESTAMP: TIMESTAMP_SYMBOL,
-  LOG_LEVEL: LOG_LEVEL_SYMBOL
+  MESSAGE_LEVEL: MESSAGE_LEVEL_SYMBOL
 }
 
-const LOG_LEVEL_CONFIGURABLE_TO_PRIORITY: Record<LogLevelConfigurable, number> = {
+const LOGGING_LEVEL_TO_PRIORITY: Record<LoggingLevel, number> = {
   trace: 0,
   debug: 1,
   info: 2,
   warn: 3,
   error: 4,
-  disabled: 5
+  off: 5
 }
-const CONFIGURABLE_LOG_LEVELS: LogLevelConfigurable[] = ['trace', 'debug', 'info', 'warn', 'error', 'disabled']
-const LOG_LEVELS: LogLevel[] = ['trace', 'debug', 'info', 'warn', 'error']
+const LOGGING_LEVELS: LoggingLevel[] = ['trace', 'debug', 'info', 'warn', 'error', 'off']
+const MESSAGE_LEVELS: MessageLevel[] = ['trace', 'debug', 'info', 'warn', 'error']
 
 const DEFAULT_TIMESTAMP_FORMATTER: TimestampFormatFunction = value => {
   const year = value.getFullYear()
@@ -56,12 +56,12 @@ const DEFAULT_TIMESTAMP_FORMATTER: TimestampFormatFunction = value => {
 function noop (): void {}
 
 export default class LevelLogger {
-  #level: LogLevelConfigurable
+  #level: LoggingLevel
   #prefixes: any[]
   #timestampFormatter: TimestampFormatFunction
   #messageFormatter: MessageFormatFunction | null
   #logger: LogFunction | null
-  #levelLogger: Record<LogLevel, LevelLogFunction>
+  #levelLogger: Record<MessageLevel, MessageLevelLogFunction>
 
   constructor (options?: LoggerOptions) {
     this.#level = 'info'
@@ -104,19 +104,19 @@ export default class LevelLogger {
     })
   }
 
-  set level (level: LogLevelConfigurable) {
+  set level (level: LoggingLevel) {
     this.#level = level
     this.updateLevelLogger()
   }
 
-  get level (): LogLevelConfigurable {
+  get level (): LoggingLevel {
     return this.#level
   }
 
   setLevel (level: string): void {
     const lowerCaseLevel = level.toLowerCase()
-    if ((CONFIGURABLE_LOG_LEVELS as string[]).includes(lowerCaseLevel)) {
-      this.level = lowerCaseLevel as LogLevelConfigurable
+    if ((LOGGING_LEVELS as string[]).includes(lowerCaseLevel)) {
+      this.level = lowerCaseLevel as LoggingLevel
     }
   }
 
@@ -130,9 +130,9 @@ export default class LevelLogger {
   }
 
   private updateLevelLogger (): void {
-    const levelPriority = LOG_LEVEL_CONFIGURABLE_TO_PRIORITY[this.#level]
-    LOG_LEVELS.forEach(logLevel => {
-      if (levelPriority <= LOG_LEVEL_CONFIGURABLE_TO_PRIORITY[logLevel]) {
+    const levelPriority = LOGGING_LEVEL_TO_PRIORITY[this.#level]
+    MESSAGE_LEVELS.forEach(logLevel => {
+      if (levelPriority <= LOGGING_LEVEL_TO_PRIORITY[logLevel]) {
         if (this.#messageFormatter == null && this.#logger == null) {
           this.#levelLogger[logLevel] = ((messageLevel, prefixes) => {
             return (message?: any, ...optionalParams: any[]) => {
@@ -199,11 +199,11 @@ export default class LevelLogger {
     })
   }
 
-  private resolveSymbols (data: any[], messageLevel: LogLevel): any[] {
+  private resolveSymbols (data: any[], messageLevel: MessageLevel): any[] {
     return data.map(p => {
       if (p === TIMESTAMP_SYMBOL) {
         return this.#timestampFormatter(new Date())
-      } else if (p === LOG_LEVEL_SYMBOL) {
+      } else if (p === MESSAGE_LEVEL_SYMBOL) {
         return messageLevel.toUpperCase()
       } else {
         return p
