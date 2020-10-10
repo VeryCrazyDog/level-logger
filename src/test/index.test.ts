@@ -46,7 +46,7 @@ test.serial('should resolve log level prefix', async (t) => {
     t.deepEqual(message, 'INFO')
   }
   const logger = new LevelLogger({
-    prefixes: [LogTags.LOG_LEVEL]
+    prefixes: [LogTags.MESSAGE_LEVEL]
   })
   logger.info()
 })

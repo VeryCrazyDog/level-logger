@@ -43,6 +43,10 @@ const LOGGING_LEVEL_TO_PRIORITY: Record<LoggingLevel, number> = {
 const LOGGING_LEVELS: LoggingLevel[] = ['trace', 'debug', 'info', 'warn', 'error', 'off']
 const MESSAGE_LEVELS: MessageLevel[] = ['trace', 'debug', 'info', 'warn', 'error']
 
+function isLoggingLevel (value: string): value is LoggingLevel {
+  return (LOGGING_LEVELS as string[]).includes(value)
+}
+
 const DEFAULT_TIMESTAMP_FORMATTER: TimestampFormatFunction = value => {
   const year = value.getFullYear()
   const month = (value.getMonth() + 1).toString().padStart(2, '0')
@@ -115,13 +119,13 @@ export default class LevelLogger {
 
   setLevel (level: string): void {
     const lowerCaseLevel = level.toLowerCase()
-    if ((LOGGING_LEVELS as string[]).includes(lowerCaseLevel)) {
-      this.level = lowerCaseLevel as LoggingLevel
+    if (isLoggingLevel(lowerCaseLevel)) {
+      this.level = lowerCaseLevel
     }
   }
 
   set prefixes (prefixes: any[]) {
-    this.#prefixes = prefixes
+    this.#prefixes = [...prefixes]
     this.updateLevelLogger()
   }
 
