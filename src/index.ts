@@ -84,10 +84,14 @@ export default class LevelLogger {
       if (options.level != null) {
         this.#level = options.level
       } else if (options.levelText != null) {
-        this.setLevel(options.levelText)
+        const lowerCaseLevel = options.levelText.toLowerCase()
+        if (isLoggingLevel(lowerCaseLevel)) {
+          this.#level = lowerCaseLevel
+          this.updateLevelLogger()
+        }
       }
       if (options.prefixes != null) {
-        this.#prefixes = options.prefixes
+        this.#prefixes = [...options.prefixes]
       }
       if (options.timestampFormatter != null) {
         this.#timestampFormatter = options.timestampFormatter
@@ -100,7 +104,7 @@ export default class LevelLogger {
   extend (options?: LoggerOptions): LevelLogger {
     return new LevelLogger({
       level: this.#level,
-      prefixes: [...this.prefixes],
+      prefixes: this.prefixes,
       timestampFormatter: this.#timestampFormatter,
       messageFormatter: this.#messageFormatter ?? undefined,
       logger: this.#logger ?? undefined,
@@ -108,25 +112,8 @@ export default class LevelLogger {
     })
   }
 
-  set level (level: LoggingLevel) {
-    this.#level = level
-    this.updateLevelLogger()
-  }
-
   get level (): LoggingLevel {
     return this.#level
-  }
-
-  setLevel (level: string): void {
-    const lowerCaseLevel = level.toLowerCase()
-    if (isLoggingLevel(lowerCaseLevel)) {
-      this.level = lowerCaseLevel
-    }
-  }
-
-  set prefixes (prefixes: any[]) {
-    this.#prefixes = [...prefixes]
-    this.updateLevelLogger()
   }
 
   get prefixes (): any[] {
