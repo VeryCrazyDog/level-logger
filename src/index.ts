@@ -10,11 +10,10 @@ export type TimestampFormatFunction = (value: Date) => string
 export type MessageFormatFunction = (
   level: MessageLevel,
   resolvedPrefixes: any[],
-  message?: any,
-  ...optionalParams: any[]
+  ...messageParams: any[]
 ) => string
 export type LogFunction = (level: MessageLevel, message: string) => void
-type MessageLevelLogFunction = (message?: any, ...optionalParams: any[]) => void
+type MessageLevelLogFunction = (...messageParams: any[]) => void
 
 export interface LoggerOptions {
   level?: LoggingLevel
@@ -62,22 +61,28 @@ export function defaultTimestampFormatter (value: Date): string {
 export function defaultMessageFormatter (
   level: MessageLevel,
   resolvedPrefixes: any[],
-  message?: any,
-  ...optionalParams: any[]
+  ...messageParams: any[]
 ): string {
-  let result: string
+  let prefix: string
   if (resolvedPrefixes.length > 0) {
-    if (message !== undefined) {
-      // @ts-expect-error, `util.format()` works in this case
-      result = util.format(...resolvedPrefixes, message)
-    } else {
-      // @ts-expect-error, `util.format()` works with zero argument
-      result = util.format(...resolvedPrefixes)
-    }
+    // @ts-expect-error, `util.format()` works with zero argument
+    prefix = util.format(...resolvedPrefixes)
   } else {
-    result = message
+    prefix = ''
   }
-  result = util.format(result, ...optionalParams)
+  let formattedMessage: string
+  if (messageParams.length > 0) {
+    // @ts-expect-error, `util.format()` works with zero argument
+    formattedMessage = util.format(...messageParams)
+  } else {
+    formattedMessage = ''
+  }
+  let result: string
+  if (prefix !== '' && formattedMessage !== '') {
+    result = `${prefix} ${formattedMessage}`
+  } else {
+    result = `${prefix}${formattedMessage}`
+  }
   return result
 }
 
@@ -152,12 +157,11 @@ export default class LevelLogger {
         this.#levelLogger[logLevel] = noop
       } else {
         this.#levelLogger[logLevel] = ((messageLevel, prefixes, messageFormatter, logger) => {
-          return (message?: any, ...optionalParams: any[]) => {
+          return (...messagePaarams: any[]) => {
             const formattedMessage = messageFormatter(
               messageLevel,
               this.resolveSymbols(prefixes, messageLevel),
-              message,
-              ...optionalParams
+              ...messagePaarams
             )
             logger(messageLevel, formattedMessage)
           }
@@ -181,23 +185,28 @@ export default class LevelLogger {
     })
   }
 
-  trace (message?: any, ...optionalParams: any[]): void {
-    this.#levelLogger.trace(message, ...optionalParams)
+  trace (message?: any, ...optionalParams: any[]): void
+  trace (...messageParams: any[]): void {
+    this.#levelLogger.trace(...messageParams)
   }
 
-  debug (message?: any, ...optionalParams: any[]): void {
-    this.#levelLogger.debug(message, ...optionalParams)
+  debug (message?: any, ...optionalParams: any[]): void
+  debug (...messageParams: any[]): void {
+    this.#levelLogger.debug(...messageParams)
   }
 
-  info (message?: any, ...optionalParams: any[]): void {
-    this.#levelLogger.info(message, ...optionalParams)
+  info (message?: any, ...optionalParams: any[]): void
+  info (...messageParams: any[]): void {
+    this.#levelLogger.info(...messageParams)
   }
 
-  warn (message?: any, ...optionalParams: any[]): void {
-    this.#levelLogger.warn(message, ...optionalParams)
+  warn (message?: any, ...optionalParams: any[]): void
+  warn (...messageParams: any[]): void {
+    this.#levelLogger.warn(...messageParams)
   }
 
-  error (message?: any, ...optionalParams: any[]): void {
-    this.#levelLogger.error(message, ...optionalParams)
+  error (message?: any, ...optionalParams: any[]): void
+  error (...messageParams: any[]): void {
+    this.#levelLogger.error(...messageParams)
   }
 }
