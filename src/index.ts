@@ -34,7 +34,7 @@ export const LogTags: Readonly<{
   MESSAGE_LEVEL: MESSAGE_LEVEL_SYMBOL
 }
 
-const LOGGING_LEVEL_TO_PRIORITY: Record<LoggingLevel, number> = {
+const LOGGING_LEVEL_TO_PRIORITY: Readonly<Record<LoggingLevel, number>> = {
   trace: 0,
   debug: 1,
   info: 2,
@@ -42,14 +42,14 @@ const LOGGING_LEVEL_TO_PRIORITY: Record<LoggingLevel, number> = {
   error: 4,
   off: 5
 }
-const LOGGING_LEVELS = new Set<LoggingLevel>(['trace', 'debug', 'info', 'warn', 'error', 'off'])
-const MESSAGE_LEVELS = new Set<MessageLevel>(['trace', 'debug', 'info', 'warn', 'error'])
+const LOGGING_LEVELS: Readonly<Set<LoggingLevel>> = new Set(['trace', 'debug', 'info', 'warn', 'error', 'off'])
+const MESSAGE_LEVELS: Readonly<Set<MessageLevel>> = new Set(['trace', 'debug', 'info', 'warn', 'error'])
 
 function isLoggingLevel (value: string): value is LoggingLevel {
   return (LOGGING_LEVELS as Set<string>).has(value)
 }
 
-const DEFAULT_TIMESTAMP_FORMATTER: TimestampFormatFunction = value => {
+function defaultTimestampFormatter (value: Date): string {
   const year = value.getFullYear()
   const month = (value.getMonth() + 1).toString().padStart(2, '0')
   const day = value.getDate().toString().padStart(2, '0')
@@ -72,7 +72,7 @@ export default class LevelLogger {
   constructor (options?: LoggerOptions) {
     this.#level = 'info'
     this.#prefixes = []
-    this.#timestampFormatter = DEFAULT_TIMESTAMP_FORMATTER
+    this.#timestampFormatter = defaultTimestampFormatter
     this.#messageFormatter = null
     this.#logger = null
     this.#levelLogger = {
