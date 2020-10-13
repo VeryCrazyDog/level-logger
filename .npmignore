@@ -1,4 +1,5 @@
 *.tgz
+.eslintignore
 .eslintrc.json
 .github
 ava.config.cjs
