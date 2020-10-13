@@ -83,7 +83,7 @@ function defaultLogger (level: MessageLevel, message: string): void {
 
 function noop (): void {}
 
-export default class LevelLogger {
+export class LevelLogger {
   #level: LoggingLevel
   #prefixes: any[]
   #timestampFormatter: TimestampFormatFunction
@@ -197,3 +197,4 @@ export default class LevelLogger {
     this.#levelLogger.error(...messageParams)
   }
 }
+export default LevelLogger

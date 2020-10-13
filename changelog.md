@@ -24,6 +24,7 @@ and this module adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.
 ### Fixed
 - Fix prefixes can be altered via `options.prefixes`.
 - Fix incorrect message content was logged in some cases, such as no prefixes and no message parameters supplied.
+- Fix `LevelLogger` class is not exported as `.LevelLogger` in module level.
 
 ## [0.1.2] - 2020-09-29
 ### Fixed
