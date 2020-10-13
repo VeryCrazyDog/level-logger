@@ -14,6 +14,7 @@ and this module adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.
 - Breaking: `LogTags.LOG_LEVEL` renamed as `LogTags.MESSAGE_LEVEL` to distinct logging level from message level.
 - Breaking: Logging level `disabled` renamed to `off` to align with well-known log4j.
 - Breaking: Final logged message was different on edge cases when `printf`-like format string was used as prefix.
+- Breaking: No message will be logged when no message parameter is supplied, even when prefixes are provided.
 
 ### Removed
 - Breaking: Method `.setLevel()`, setter `.level` and setter `.prefixes` are removed. Use `.extend()` instead.

@@ -63,25 +63,16 @@ export function defaultMessageFormatter (
   resolvedPrefixes: any[],
   ...messageParams: any[]
 ): string {
-  let prefix: string
+  if (messageParams.length === 0) { return '' }
+  // @ts-expect-error, `util.format()` works with zero argument
+  const formattedMessage = util.format(...messageParams)
+  let result: string
   if (resolvedPrefixes.length > 0) {
     // @ts-expect-error, `util.format()` works with zero argument
-    prefix = util.format(...resolvedPrefixes)
-  } else {
-    prefix = ''
-  }
-  let formattedMessage: string
-  if (messageParams.length > 0) {
-    // @ts-expect-error, `util.format()` works with zero argument
-    formattedMessage = util.format(...messageParams)
-  } else {
-    formattedMessage = ''
-  }
-  let result: string
-  if (prefix !== '' && formattedMessage !== '') {
+    const prefix = util.format(...resolvedPrefixes)
     result = `${prefix} ${formattedMessage}`
   } else {
-    result = `${prefix}${formattedMessage}`
+    result = formattedMessage
   }
   return result
 }
