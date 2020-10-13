@@ -24,7 +24,7 @@ test.serial('should log correctly with single message', async (t) => {
 test.serial('should log correctly with message and parameters', async (t) => {
   const logger = new LevelLogger()
   logger.info('Hello', 'again,', 'world!')
-  t.true(t.context.consoleInfoStub.calledOnceWithExactly('Hello', 'again,', 'world!'))
+  t.true(t.context.consoleInfoStub.calledOnceWithExactly('Hello again, world!'))
 })
 
 test.serial('should resolve timestamp prefix', async (t) => {

@@ -6,7 +6,8 @@ and this module adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 ### Added
-- LogTags now comes with `ISO_TIMESTAMP` which produce timestamp such as `2020-10-13T08:46:38.803Z`.
+- Log tags now comes with `ISO_TIMESTAMP` which produce timestamp such as `2020-10-13T08:46:38.803Z`.
+- Default timestamp formatter and default message formatter are exported for use.
 
 ### Changed
 - Breaking: Split formatting role of option `logger` as separated option `messageFormatter`.

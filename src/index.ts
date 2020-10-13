@@ -9,7 +9,7 @@ export type LoggingLevel = 'off' | MessageLevel
 export type TimestampFormatFunction = (value: Date) => string
 export type MessageFormatFunction = (
   level: MessageLevel,
-  prefixes: any[],
+  resolvedPrefixes: any[],
   message?: any,
   ...optionalParams: any[]
 ) => string
@@ -49,7 +49,7 @@ function isLoggingLevel (value: string): value is LoggingLevel {
   return (LOGGING_LEVELS as Set<string>).has(value)
 }
 
-function defaultTimestampFormatter (value: Date): string {
+export function defaultTimestampFormatter (value: Date): string {
   const year = value.getFullYear()
   const month = (value.getMonth() + 1).toString().padStart(2, '0')
   const day = value.getDate().toString().padStart(2, '0')
@@ -59,35 +59,55 @@ function defaultTimestampFormatter (value: Date): string {
   return `${year}-${month}-${day} ${hour}:${minute}:${second}`
 }
 
+export function defaultMessageFormatter (
+  level: MessageLevel,
+  resolvedPrefixes: any[],
+  message?: any,
+  ...optionalParams: any[]
+): string {
+  let result: string
+  if (resolvedPrefixes.length > 0) {
+    if (message !== undefined) {
+      // @ts-expect-error, `util.format()` works in this case
+      result = util.format(...resolvedPrefixes, message)
+    } else {
+      // @ts-expect-error, `util.format()` works with zero argument
+      result = util.format(...resolvedPrefixes)
+    }
+  } else {
+    result = message
+  }
+  result = util.format(result, ...optionalParams)
+  return result
+}
+
+function defaultLogger (level: MessageLevel, message: string): void {
+  console[level](message)
+}
+
 function noop (): void {}
 
 export default class LevelLogger {
   #level: LoggingLevel
   #prefixes: any[]
   #timestampFormatter: TimestampFormatFunction
-  #messageFormatter: MessageFormatFunction | null
-  #logger: LogFunction | null
+  #messageFormatter: MessageFormatFunction
+  #logger: LogFunction
   #levelLogger: Record<MessageLevel, MessageLevelLogFunction>
 
   constructor (options?: LoggerOptions) {
     this.#level = 'info'
     this.#prefixes = []
     this.#timestampFormatter = defaultTimestampFormatter
-    this.#messageFormatter = null
-    this.#logger = null
-    this.#levelLogger = {
-      trace: console.trace,
-      debug: console.debug,
-      info: console.info,
-      warn: console.warn,
-      error: console.error
-    }
+    this.#messageFormatter = defaultMessageFormatter
+    this.#logger = defaultLogger
+    // @ts-expect-error, we will initialize later
+    this.#levelLogger = {}
     if (options != null) {
       if (options.level != null) {
         const lowerCaseLevel = options.level.toLowerCase()
         if (isLoggingLevel(lowerCaseLevel)) {
           this.#level = lowerCaseLevel
-          this.updateLevelLogger()
         }
       }
       if (options.prefixes != null) {
@@ -96,7 +116,12 @@ export default class LevelLogger {
       if (options.timestampFormatter != null) {
         this.#timestampFormatter = options.timestampFormatter
       }
-      this.#logger = options.logger ?? null
+      if (options.messageFormatter != null) {
+        this.#messageFormatter = options.messageFormatter
+      }
+      if (options.logger != null) {
+        this.#logger = options.logger
+      }
     }
     this.updateLevelLogger()
   }
@@ -106,8 +131,8 @@ export default class LevelLogger {
       level: this.#level,
       prefixes: this.prefixes,
       timestampFormatter: this.#timestampFormatter,
-      messageFormatter: this.#messageFormatter ?? undefined,
-      logger: this.#logger ?? undefined,
+      messageFormatter: this.#messageFormatter,
+      logger: this.#logger,
       ...options
     })
   }
@@ -123,69 +148,20 @@ export default class LevelLogger {
   private updateLevelLogger (): void {
     const levelPriority = LOGGING_LEVEL_TO_PRIORITY[this.#level]
     MESSAGE_LEVELS.forEach(logLevel => {
-      if (levelPriority <= LOGGING_LEVEL_TO_PRIORITY[logLevel]) {
-        if (this.#messageFormatter == null && this.#logger == null) {
-          this.#levelLogger[logLevel] = ((messageLevel, prefixes) => {
-            return (message?: any, ...optionalParams: any[]) => {
-              let newMessage: any
-              if (prefixes.length > 0) {
-                const [format, ...params] = this.resolveSymbols(prefixes, messageLevel)
-                if (message !== undefined) {
-                  newMessage = util.format(format, ...params, message)
-                } else {
-                  newMessage = util.format(format, ...params)
-                }
-              } else {
-                newMessage = message
-              }
-              console[messageLevel](newMessage, ...optionalParams)
-            }
-          })(logLevel, this.#prefixes)
-        } else if (this.#messageFormatter == null && this.#logger != null) {
-          this.#levelLogger[logLevel] = ((messageLevel, prefixes, logger) => {
-            return (message?: any, ...optionalParams: any[]) => {
-              let newMessage: string
-              if (prefixes.length > 0) {
-                const [format, ...params] = this.resolveSymbols(prefixes, messageLevel)
-                if (message !== undefined) {
-                  newMessage = util.format(format, ...params, message)
-                } else {
-                  newMessage = util.format(format, ...params)
-                }
-              } else {
-                newMessage = message
-              }
-              newMessage = util.format(newMessage, ...optionalParams)
-              logger(messageLevel, newMessage)
-            }
-          })(logLevel, this.#prefixes, this.#logger)
-        } else if (this.#messageFormatter != null && this.#logger == null) {
-          this.#levelLogger[logLevel] = ((messageLevel, prefixes, messageFormatter) => {
-            return (message?: any, ...optionalParams: any[]) => {
-              const newMessage = messageFormatter(
-                messageLevel,
-                this.resolveSymbols(prefixes, messageLevel),
-                message,
-                ...optionalParams
-              )
-              console[messageLevel](newMessage)
-            }
-          })(logLevel, this.#prefixes, this.#messageFormatter)
-        } else if (this.#messageFormatter != null && this.#logger != null) {
-          this.#levelLogger[logLevel] = ((messageLevel, prefixes, messageFormatter, logger) => {
-            return (message?: any, ...optionalParams: any[]) => {
-              const newMessage = messageFormatter(
-                messageLevel,
-                this.resolveSymbols(prefixes, messageLevel),
-                message,
-                ...optionalParams
-              )
-              logger(messageLevel, newMessage)
-            }
-          })(logLevel, this.#prefixes, this.#messageFormatter, this.#logger)
-        }
-      } else {
+      if (levelPriority > LOGGING_LEVEL_TO_PRIORITY[logLevel]) {
         this.#levelLogger[logLevel] = noop
+      } else {
+        this.#levelLogger[logLevel] = ((messageLevel, prefixes, messageFormatter, logger) => {
+          return (message?: any, ...optionalParams: any[]) => {
+            const formattedMessage = messageFormatter(
+              messageLevel,
+              this.resolveSymbols(prefixes, messageLevel),
+              message,
+              ...optionalParams
+            )
+            logger(messageLevel, formattedMessage)
+          }
+        })(logLevel, this.#prefixes, this.#messageFormatter, this.#logger)
       }
     })
   }
