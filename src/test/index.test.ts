@@ -4,7 +4,11 @@ import sinon from 'sinon'
 import LevelLogger, { LogTags } from '../index'
 
 const test = anyTest as TestInterface<{
-  consoleInfoStub: sinon.SinonStub<[message?: any, ...optionalParams: any[]], void>
+  consoleTraceStub: sinon.SinonStub<Parameters<typeof console.trace>, void>
+  consoleDebugStub: sinon.SinonStub<Parameters<typeof console.debug>, void>
+  consoleInfoStub: sinon.SinonStub<Parameters<typeof console.info>, void>
+  consoleWarnStub: sinon.SinonStub<Parameters<typeof console.warn>, void>
+  consoleErrorStub: sinon.SinonStub<Parameters<typeof console.error>, void>
 }>
 
 function calledOnceWithExactly<T, S extends any[]> (
@@ -15,7 +19,11 @@ function calledOnceWithExactly<T, S extends any[]> (
 }
 
 test.beforeEach(t => {
+  t.context.consoleTraceStub = sinon.stub(console, 'trace')
+  t.context.consoleDebugStub = sinon.stub(console, 'debug')
   t.context.consoleInfoStub = sinon.stub(console, 'info')
+  t.context.consoleWarnStub = sinon.stub(console, 'warn')
+  t.context.consoleErrorStub = sinon.stub(console, 'error')
 })
 
 test.afterEach.always(() => {
@@ -55,6 +63,10 @@ test.serial('should log correctly some prefixes and multiple message parameters'
   logger.info('MessageC', 'MessageD')
   calledOnceWithExactly(t, t.context.consoleInfoStub, 'A B MessageC MessageD')
 })
+
+test.serial.todo('should log with logging level as specified in options')
+
+test.serial.todo('should have all logging level working properly')
 
 test.serial('should resolve timestamp prefix', async (t) => {
   const timestampRegex = /^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2} message$/
