@@ -40,11 +40,11 @@ const LOGGING_LEVEL_TO_PRIORITY: Record<LoggingLevel, number> = {
   error: 4,
   off: 5
 }
-const LOGGING_LEVELS: LoggingLevel[] = ['trace', 'debug', 'info', 'warn', 'error', 'off']
-const MESSAGE_LEVELS: MessageLevel[] = ['trace', 'debug', 'info', 'warn', 'error']
+const LOGGING_LEVELS = new Set<LoggingLevel>(['trace', 'debug', 'info', 'warn', 'error', 'off'])
+const MESSAGE_LEVELS = new Set<MessageLevel>(['trace', 'debug', 'info', 'warn', 'error'])
 
 function isLoggingLevel (value: string): value is LoggingLevel {
-  return (LOGGING_LEVELS as string[]).includes(value)
+  return (LOGGING_LEVELS as Set<string>).has(value)
 }
 
 const DEFAULT_TIMESTAMP_FORMATTER: TimestampFormatFunction = value => {
