@@ -12,6 +12,8 @@ and this module adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.
 
 ### Removed
 - Breaking: Method `.setLevel()`, setter `.level` and setter `.prefixes` are removed. Use `.extend()` instead.
+- Breaking: Options `levelText` is removed. Use `options.level = 'INFO' as LoggingLevel` instead.
+	Invalid level will be ignored.
 
 ### Fixed
 - Fix prefixes can be altered via `options.prefixes`.

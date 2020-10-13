@@ -17,7 +17,6 @@ type MessageLevelLogFunction = (message?: any, ...optionalParams: any[]) => void
 
 export interface LoggerOptions {
   level?: LoggingLevel
-  levelText?: string
   prefixes?: any[]
   timestampFormatter?: TimestampFormatFunction
   messageFormatter?: MessageFormatFunction
@@ -82,9 +81,7 @@ export default class LevelLogger {
     }
     if (options != null) {
       if (options.level != null) {
-        this.#level = options.level
-      } else if (options.levelText != null) {
-        const lowerCaseLevel = options.levelText.toLowerCase()
+        const lowerCaseLevel = options.level.toLowerCase()
         if (isLoggingLevel(lowerCaseLevel)) {
           this.#level = lowerCaseLevel
           this.updateLevelLogger()
