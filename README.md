@@ -7,7 +7,7 @@ A flexible logger supports log level. Inpired by [console-log-level], [got] and 
 level-logger was created because of inability to perform certain tasks on existing propular logging modules:
 - Unable processing message parameters after logging level check to avoid unnecessary string processing.
 - Not convenient to alter message prefix.
-- ~~[winston] did not support multiple message parameters~~ it was supported via `format.splat()`
+- ~~[winston] did not support multiple message parameters.~~ It was supported via `format.splat()`
 	but unfortunately unable to find out at the time of inventing level-logger.
 - console-log-level [hardcoded message level to logging function mapping][1].
 
@@ -129,9 +129,7 @@ const winston = require('winston')
 
 const winstonLogger = winston.createLogger({
 	level: 'debug',
-	format: winston.format.printf(({ message }) => {
-		return message
-	}),
+	format: winston.format.printf(({ message }) => message),
 	transports: [
 		new winston.transports.Console(),
 		new winston.transports.File({ filename: 'app.log' })
