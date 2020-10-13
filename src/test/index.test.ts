@@ -99,10 +99,10 @@ test.serial('extend should retain previous logger options', async (t) => {
 })
 
 test.serial('extend should allow change of prefixes', async (t) => {
-  let loggerA = new LevelLogger({
+  const loggerA = new LevelLogger({
     prefixes: ['A']
   })
-  let loggerB = loggerA.extend({
+  const loggerB = loggerA.extend({
     prefixes: ['B']
   })
   t.deepEqual(loggerA.prefixes, ['A'])

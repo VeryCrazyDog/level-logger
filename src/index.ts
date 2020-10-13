@@ -119,7 +119,23 @@ export default class LevelLogger {
         this.#logger = options.logger
       }
     }
-    this.updateLevelLogger()
+    const levelPriority = LOGGING_LEVEL_TO_PRIORITY[this.#level]
+    MESSAGE_LEVELS.forEach(logLevel => {
+      if (levelPriority > LOGGING_LEVEL_TO_PRIORITY[logLevel]) {
+        this.#levelLogger[logLevel] = noop
+      } else {
+        this.#levelLogger[logLevel] = ((messageLevel, prefixes, messageFormatter, logger) => {
+          return (...messagePaarams: any[]) => {
+            const formattedMessage = messageFormatter(
+              messageLevel,
+              this.resolveSymbols(prefixes, messageLevel),
+              ...messagePaarams
+            )
+            logger(messageLevel, formattedMessage)
+          }
+        })(logLevel, this.#prefixes, this.#messageFormatter, this.#logger)
+      }
+    })
   }
 
   extend (options?: LoggerOptions): LevelLogger {
@@ -139,26 +155,6 @@ export default class LevelLogger {
 
   get prefixes (): any[] {
     return [...this.#prefixes]
-  }
-
-  private updateLevelLogger (): void {
-    const levelPriority = LOGGING_LEVEL_TO_PRIORITY[this.#level]
-    MESSAGE_LEVELS.forEach(logLevel => {
-      if (levelPriority > LOGGING_LEVEL_TO_PRIORITY[logLevel]) {
-        this.#levelLogger[logLevel] = noop
-      } else {
-        this.#levelLogger[logLevel] = ((messageLevel, prefixes, messageFormatter, logger) => {
-          return (...messagePaarams: any[]) => {
-            const formattedMessage = messageFormatter(
-              messageLevel,
-              this.resolveSymbols(prefixes, messageLevel),
-              ...messagePaarams
-            )
-            logger(messageLevel, formattedMessage)
-          }
-        })(logLevel, this.#prefixes, this.#messageFormatter, this.#logger)
-      }
-    })
   }
 
   private resolveSymbols (data: any[], messageLevel: MessageLevel): any[] {
