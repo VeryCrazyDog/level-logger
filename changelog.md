@@ -5,6 +5,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this module adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+### Added
+- LogTags now comes with `ISO_TIMESTAMP` which produce timestamp such as `2020-10-13T08:46:38.803Z`.
+
 ### Changed
 - Breaking: Split formatting role of option `logger` as separated option `messageFormatter`.
 - Breaking: `LogTags.LOG_LEVEL` renamed as `LogTags.MESSAGE_LEVEL` to distinct logging level from message level.

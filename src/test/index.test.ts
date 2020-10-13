@@ -11,11 +11,7 @@ test.beforeEach(t => {
   t.context.consoleInfoStub = sinon.stub(console, 'info')
 })
 
-test.afterEach(() => {
-  sinon.restore()
-})
-
-test.after.always(() => {
+test.afterEach.always(() => {
   sinon.restore()
 })
 
@@ -35,6 +31,18 @@ test.serial('should resolve timestamp prefix', async (t) => {
   const timestampRegex = /\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}/
   const logger = new LevelLogger({
     prefixes: [LogTags.TIMESTAMP]
+  })
+  logger.info()
+  const args = t.context.consoleInfoStub.args
+  t.deepEqual(args.length, 1)
+  t.deepEqual(args[0].length, 1)
+  t.true(timestampRegex.test(args[0][0]))
+})
+
+test.serial('should resolve ISO timestamp prefix', async (t) => {
+  const timestampRegex = /\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z/
+  const logger = new LevelLogger({
+    prefixes: [LogTags.ISO_TIMESTAMP]
   })
   logger.info()
   const args = t.context.consoleInfoStub.args

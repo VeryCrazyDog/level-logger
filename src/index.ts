@@ -1,6 +1,7 @@
 import util from 'util'
 
 const TIMESTAMP_SYMBOL: unique symbol = Symbol('timestamp')
+const ISO_TIMESTAMP_SYMBOL: unique symbol = Symbol('iso-timestamp')
 const MESSAGE_LEVEL_SYMBOL: unique symbol = Symbol('message-level')
 
 export type MessageLevel = 'trace' | 'debug' | 'info' | 'warn' | 'error'
@@ -25,9 +26,11 @@ export interface LoggerOptions {
 
 export const LogTags: Readonly<{
   TIMESTAMP: typeof TIMESTAMP_SYMBOL
+  ISO_TIMESTAMP: typeof ISO_TIMESTAMP_SYMBOL
   MESSAGE_LEVEL: typeof MESSAGE_LEVEL_SYMBOL
 }> = {
   TIMESTAMP: TIMESTAMP_SYMBOL,
+  ISO_TIMESTAMP: ISO_TIMESTAMP_SYMBOL,
   MESSAGE_LEVEL: MESSAGE_LEVEL_SYMBOL
 }
 
@@ -189,12 +192,15 @@ export default class LevelLogger {
 
   private resolveSymbols (data: any[], messageLevel: MessageLevel): any[] {
     return data.map(p => {
-      if (p === TIMESTAMP_SYMBOL) {
-        return this.#timestampFormatter(new Date())
-      } else if (p === MESSAGE_LEVEL_SYMBOL) {
-        return messageLevel.toUpperCase()
-      } else {
-        return p
+      switch (p) {
+        case TIMESTAMP_SYMBOL:
+          return this.#timestampFormatter(new Date())
+        case ISO_TIMESTAMP_SYMBOL:
+          return (new Date()).toISOString()
+        case MESSAGE_LEVEL_SYMBOL:
+          return messageLevel.toUpperCase()
+        default:
+          return p
       }
     })
   }
