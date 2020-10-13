@@ -4,6 +4,18 @@ A flexible logger supports log level. Inpired by [console-log-level], [got] and 
 [![Version on npm]][level-logger]
 [![Supported Node.js version]][Node.js download]
 
+level-logger was created because of inability to perform certain tasks on existing propular logging modules:
+- Unable processing message parameters after logging level check to avoid unnecessary string processing.
+- Not convenient to alter message prefix.
+- ~~[winston] did not support multiple message parameters~~ it was supported via `format.splat()`
+	but unfortunately unable to find out at the time of inventing level-logger.
+- console-log-level [hardcoded message level to logging function mapping][1].
+
+The design of level-logger was inpired by:
+- [console-log-level], level-logger is designed to be simple to use.
+- `.extend()` of [got], `.extend()` method was added for conveniently alter the behavior of logger.
+- `methodFactory` of [loglevel], level-logger is highly customizable.
+
 
 ## Install
 ```
@@ -150,3 +162,5 @@ This module is licensed under the [MIT License](./LICENSE).
 [Node.js download]: https://nodejs.org/en/download
 [Supported Node.js version]: https://badgen.net/npm/node/@verycrazydog/level-logger
 [Version on npm]: https://badgen.net/npm/v/@verycrazydog/level-logger
+[winston]: https://www.npmjs.com/package/winston
+[1]: https://github.com/watson/console-log-level/pull/14#issue-282104785

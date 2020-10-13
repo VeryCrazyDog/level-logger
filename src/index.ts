@@ -125,10 +125,11 @@ export class LevelLogger {
         this.#levelLogger[logLevel] = noop
       } else {
         this.#levelLogger[logLevel] = ((messageLevel, prefixes, messageFormatter, logger) => {
+          const messageLevelUpperCase = messageLevel.toUpperCase()
           return (...messagePaarams: any[]) => {
             const formattedMessage = messageFormatter(
               messageLevel,
-              this.resolveSymbols(prefixes, messageLevel),
+              this.resolveSymbols(prefixes, messageLevelUpperCase),
               ...messagePaarams
             )
             logger(messageLevel, formattedMessage)
@@ -157,7 +158,7 @@ export class LevelLogger {
     return [...this.#prefixes]
   }
 
-  private resolveSymbols (data: any[], messageLevel: MessageLevel): any[] {
+  private resolveSymbols (data: any[], messageLevel: string): any[] {
     return data.map(p => {
       switch (p) {
         case TIMESTAMP_SYMBOL:
@@ -165,7 +166,7 @@ export class LevelLogger {
         case ISO_TIMESTAMP_SYMBOL:
           return (new Date()).toISOString()
         case MESSAGE_LEVEL_SYMBOL:
-          return messageLevel.toUpperCase()
+          return messageLevel
         default:
           return p
       }
