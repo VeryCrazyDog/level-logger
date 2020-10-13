@@ -1,54 +1,54 @@
-import test from 'ava'
+import anyTest, { TestInterface } from 'ava'
+import sinon from 'sinon'
 
 import LevelLogger, { LogTags } from '../index'
 
-const originalConsoleInfo = console.info
+const test = anyTest as TestInterface<{
+  consoleInfoStub: sinon.SinonStub<[message?: any, ...optionalParams: any[]], void>
+}>
+
+test.beforeEach(t => {
+  t.context.consoleInfoStub = sinon.stub(console, 'info')
+})
 
 test.afterEach(() => {
-  console.info = originalConsoleInfo
+  sinon.restore()
 })
 
 test.after.always(() => {
-  console.info = originalConsoleInfo
+  sinon.restore()
 })
 
 test.serial('should log correctly with single message', async (t) => {
-  console.info = message => {
-    t.deepEqual(message, 'Hello world!')
-  }
   const logger = new LevelLogger()
   logger.info('Hello world!')
+  t.true(t.context.consoleInfoStub.calledOnceWithExactly('Hello world!'))
 })
 
 test.serial('should log correctly with message and parameters', async (t) => {
-  console.info = (message, param1, param2) => {
-    t.deepEqual(message, 'Hello')
-    t.deepEqual(param1, 'again,')
-    t.deepEqual(param2, 'world!')
-  }
   const logger = new LevelLogger()
   logger.info('Hello', 'again,', 'world!')
+  t.true(t.context.consoleInfoStub.calledOnceWithExactly('Hello', 'again,', 'world!'))
 })
 
 test.serial('should resolve timestamp prefix', async (t) => {
   const timestampRegex = /\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}/
-  console.info = message => {
-    t.true(timestampRegex.test(message))
-  }
   const logger = new LevelLogger({
     prefixes: [LogTags.TIMESTAMP]
   })
   logger.info()
+  const args = t.context.consoleInfoStub.args
+  t.deepEqual(args.length, 1)
+  t.deepEqual(args[0].length, 1)
+  t.true(timestampRegex.test(args[0][0]))
 })
 
 test.serial('should resolve log level prefix', async (t) => {
-  console.info = message => {
-    t.deepEqual(message, 'INFO')
-  }
   const logger = new LevelLogger({
     prefixes: [LogTags.MESSAGE_LEVEL]
   })
   logger.info()
+  t.true(t.context.consoleInfoStub.calledOnceWithExactly('INFO'))
 })
 
 test.serial('extend should retain previous logger options', async (t) => {
@@ -62,18 +62,15 @@ test.serial('extend should retain previous logger options', async (t) => {
 })
 
 test.serial('extend should allow change of prefixes', async (t) => {
-  console.info = message => {
-    t.deepEqual(message, 'A')
-  }
   let logger = new LevelLogger({
     prefixes: ['A']
   })
   logger.info()
-  console.info = message => {
-    t.deepEqual(message, 'B')
-  }
   logger = logger.extend({
     prefixes: ['B']
   })
   logger.info()
+  t.true(t.context.consoleInfoStub.calledTwice)
+  t.true(t.context.consoleInfoStub.firstCall.calledWithExactly('A'))
+  t.true(t.context.consoleInfoStub.secondCall.calledWithExactly('B'))
 })
